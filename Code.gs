@@ -22,12 +22,15 @@ function formSubmit(e, properties) {
       var theFormObject = {};
       theFormObject["TIMESTAMP"]=e.response.getTimestamp().toUTCString();
       theFormObject["USERNAME"]=e.response.getRespondentEmail();
-      var responseTable= '<table style="border-spacing: 5px 0; width:100%"><tr><th style="background-color:#C0C0C0">Question</th><th style="background-color:#C0C0C0">Answer</th></tr>'+
-        '<tr><td>From</td><td><a href="mailto:'+theFormObject["USERNAME"] +'">'+theFormObject["USERNAME"]+'</a></td></tr>'+
-          '<tr><td style="background-color:#f6f6f6;">Submit Date</td><td style="background-color:#f6f6f6;">'+theFormObject["TIMESTAMP"]+'</td></tr>';
+      var responseTable= '<table style="border-spacing: 5px 0; width:100%"><tr><th style="background-color:#C0C0C0">Question</th><th style="background-color:#C0C0C0">Answer</th></tr>';
+      var responseText ="";
       
-      var responseText='From : '+theFormObject["TIMESTAMP"]+'\n'
-      +'Submit Date : ' + theFormObject["USERNAME"] +'\n';
+      if (theFormObject["USERNAME"]!=undefined && theFormObject["USERNAME"]!="") {
+        responseTable+='<tr><td>From</td><td><a href="mailto:'+theFormObject["USERNAME"] +'">'+theFormObject["USERNAME"]+'</a></td></tr>';
+        responseText='From : '+theFormObject["USERNAME"]+'\n'
+      }
+      responseTable+='<tr><td style="background-color:#f6f6f6;">Submit Date</td><td style="background-color:#f6f6f6;">'+theFormObject["TIMESTAMP"]+'</td></tr>';
+      responseText+='Submit Date : ' + theFormObject["TIMESTAMP"] +'\n';
       
       var itemResponses = e.response.getItemResponses();
       var i=0;
@@ -48,13 +51,13 @@ function formSubmit(e, properties) {
                 responseText+= itemResponse.getResponse()[k]+', ';
               }
               else {
-                responseText+= itemResponse.getResponse()[k];
+                responseText+= itemResponse.getResponse()[k]+'\n';
               }
             }
           }
           else {
             responseTable += itemResponse.getResponse().replace(/\n/g, '<br />');
-            responseText  += itemResponse.getResponse();
+            responseText  += itemResponse.getResponse()+'\n';
           }
           
           responseTable+='</td></tr>';
@@ -92,7 +95,12 @@ function formSubmit(e, properties) {
     }
     
     if (sendTextOnly) {
-      mailObject.body=responseText;
+      if (!sendContent) {
+        mailObject.body = emailSubject+" has a new submission\n";
+      }
+      else {
+        mailObject.body=responseText;
+      }
     }
     else {
       mailObject.htmlBody=theResponse.evaluate().getContent();
