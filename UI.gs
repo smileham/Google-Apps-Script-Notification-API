@@ -1,115 +1,127 @@
-function formSubmit(e, properties) {
+/**
+* Add configuration menus to the Form UI
+*/
+function onOpen() {
   
-  try {
-    
-    var notificationList = properties.notificationList;
-    var emailSubject = properties.emailSubject;
-    var emailHeader = properties.emailHeader;
-    var sendContent = properties.sendContent=="true"?true:false;
-    var sendReceipt = properties.sendReceipt=="true"?true:false;
-    var sendTextOnly = properties.sendTextOnly=="true"?true:false;
-    var includeReference = properties.includeReference=="true"?true:false;
-    var sendAttachment = properties.sendAttachment=="true"?true:false;
-    
-    var currentReferenceNumber = 0;
-    
-    if (includeReference && properties.referenceNumber!=undefined) {
-        currentReferenceNumber = Number(properties.referenceNumber);
-      }
-      
-    if (sendContent || sendAttachment) {
-      
-      var theFormObject = {};
-      theFormObject["TIMESTAMP"]=e.response.getTimestamp().toUTCString();
-      theFormObject["USERNAME"]=e.response.getRespondentEmail();
-      var responseTable= '<table style="border-spacing: 5px 0; width:100%"><tr><th style="background-color:#C0C0C0">Question</th><th style="background-color:#C0C0C0">Answer</th></tr>';
-      var responseText ="";
-      
-      if (theFormObject["USERNAME"]!=undefined && theFormObject["USERNAME"]!="") {
-        responseTable+='<tr><td>From</td><td><a href="mailto:'+theFormObject["USERNAME"] +'">'+theFormObject["USERNAME"]+'</a></td></tr>';
-        responseText='From : '+theFormObject["USERNAME"]+'\n'
-      }
-      responseTable+='<tr><td style="background-color:#f6f6f6;">Submit Date</td><td style="background-color:#f6f6f6;">'+theFormObject["TIMESTAMP"]+'</td></tr>';
-      responseText+='Submit Date : ' + theFormObject["TIMESTAMP"] +'\n';
-      
-      var itemResponses = e.response.getItemResponses();
-      var i=0;
-      
-      for (var j = 0; j < itemResponses.length; j++) {
-        var itemResponse = itemResponses[j];
-        
-        if (itemResponse.getResponse()!="") {
-          i++;
-          responseTable+='<tr><td valign="top" style="white-space:nowrap;'+(i%2==0?'background-color:#f6f6f6;':'')+'">'+itemResponse.getItem().getTitle()+'</td>'+
-            '<td valign="top" '+(i%2==0?'style="background-color:#f6f6f6;"':'')+'>';
-          responseText+=itemResponse.getItem().getTitle()+' : ';
-          
-          if( Object.prototype.toString.call( itemResponse.getResponse() ) === '[object Array]' ) {
-            for (var k=0; k<itemResponse.getResponse().length; k++) {
-              responseTable+= itemResponse.getResponse()[k]+'<br />';
-              if (k!=itemResponse.getResponse().length-1) {
-                responseText+= itemResponse.getResponse()[k]+', ';
-              }
-              else {
-                responseText+= itemResponse.getResponse()[k]+'\n';
-              }
-            }
-          }
-          else {
-            responseTable += itemResponse.getResponse().replace(/\n/g, '<br />');
-            responseText  += itemResponse.getResponse()+'\n';
-          }
-          
-          responseTable+='</td></tr>';
-        }
-      }
-      responseTable+="</table>";
-    }
-    if (!sendContent) {
-      var responseTable = "<p>"+emailSubject+" has a new submission</p>";
-    }
-    
-    
-    var theResponse = HtmlService.createTemplateFromFile('ResponseBody');
-    theResponse.header = emailHeader;
-    theResponse.responseTable = responseTable;
-    
-    responseText = emailHeader+'\n'+responseText
-    
-    if (sendReceipt && theFormObject["USERNAME"]!="") {
-      notificationList=theFormObject["USERNAME"]+","+notificationList;
-    }
-    if (includeReference) {
-      emailSubject+=' - '+currentReferenceNumber;
-    }
-    
-    var mailObject = {
-      to: notificationList,
-      subject: emailSubject,
-      noReply: true
-    };
-    
-    if (sendAttachment) {
-      var theBlob = Utilities.newBlob(responseText, "text/plain", emailSubject+'.txt');
-      mailObject.attachments=theBlob;
-    }
-    
-    if (sendTextOnly) {
-      if (!sendContent) {
-        mailObject.body = emailSubject+" has a new submission\n";
-      }
-      else {
-        mailObject.body=responseText;
-      }
-    }
-    else {
-      mailObject.htmlBody=theResponse.evaluate().getContent();
-    }
-    MailApp.sendEmail(mailObject);
-    
-    return currentReferenceNumber+1;
+   FormApp.getUi()
+       .createMenu('Configure')
+       .addItem('Configure Email', 'updatePreferences')
+       .addItem('Uninstall', 'removeTriggers')
+       .addToUi();
+ }
+
+/**
+* Shows the UI allowing the user to configure the project preferences for the script
+*
+* @param {object} project properties to use
+*/
+function updatePreferences(properties) {
+  
+  if (properties==undefined || properties.notificationList==undefined) {
+     var properties = {
+       "notificationList" : "",
+       "emailSubject" : "",
+       "emailHeader" : "",
+       "sendAttachment" : "false",
+       "sendTextOnly" : "false",
+       "sendContent" : "false",
+       "sendReceipt" : "false",
+       "includeReference" : "false"
+     };
   }
-  catch(e) {
-    MailApp.sendEmail(PropertiesService.getScriptProperties().getProperty("errorLogEmail"), "Error in FormNotificationAPI", e);
+  
+  var theUi = FormApp.getUi();
+  var app = UiApp.createApplication().setTitle("Configure Preferences");
+  
+  var thePanel = app.createFormPanel().setWidth("100%");
+  var theFlow  = app.createFlowPanel().setWidth("100%");
+ 
+  var notificationListBox = app.createTextBox().setValue(properties.notificationList).setName('notificationListBox').setWidth("100%");
+  var emailSubjectBox = app.createTextBox().setValue(properties.emailSubject).setName('emailSubjectBox').setWidth("100%");
+  var emailHeaderBox = app.createTextArea().setValue(properties.emailHeader).setName('emailHeaderBox').setWidth("100%").setHeight("50px");
+  var sendTextOnlyCheckBox = app.createCheckBox().setValue(properties.sendTextOnly=="true").setName('sendTextOnlyCheckBox').setWidth("100%");
+  var sendContentCheckBox = app.createCheckBox().setValue(properties.sendContent=="true").setName('sendContentCheckBox').setWidth("100%");
+  var sendReceiptCheckBox = app.createCheckBox().setValue(properties.sendReceipt=="true").setName('sendReceiptCheckBox').setWidth("100%");
+  var sendAttachmentCheckBox = app.createCheckBox().setValue(properties.sendAttachment=="true").setName('sendAttachmentCheckBox').setWidth("100%");
+  var includeReferenceCheckBox = app.createCheckBox().setValue(properties.includeReference=="true").setName('includeReferenceCheckBox').setWidth("100%");
+
+  var submitButton = app.createSubmitButton("Update").setWidth("100%");
+  
+  var auth = false;
+  var owner = DocsList.getFileById(FormApp.getActiveForm().getId()).getOwner();
+  if (owner==Session.getActiveUser().getEmail()) {
+    theFlow.add(app.createLabel("You have access to administer this form"));
+    auth=true;
+  }
+  else {
+    theFlow.add(app.createLabel("Please contact "+owner+" to change these settings"));
+  }
+  
+  var theEmailGrid = app.createGrid(2,2).setWidth("100%").setColumnStyleAttribute(0, "width", "20%")
+  .setText(0, 0, "Notification List:")
+  .setWidget(0, 1, notificationListBox)
+  .setText(1,0,"Email Subject")
+  .setWidget(1, 1, emailSubjectBox);
+  
+  theFlow.add(theEmailGrid).add(app.createLabel("Email Header:").setWidth("100%")).add(emailHeaderBox);
+  
+  
+  var theCheckGrid = app.createGrid(3, 4)
+  .setText(0, 0, "Send Plain Text:")
+  .setWidget(0, 1, sendTextOnlyCheckBox)
+  .setText(0, 2, "Show Questions & Answers:")
+  .setWidget(0, 3, sendContentCheckBox)
+  .setText(1, 0, "Send Attachment:")
+  .setWidget(1, 1, sendAttachmentCheckBox)
+  .setText(1, 2, "Send Receipt:")
+  .setWidget(1, 3, sendReceiptCheckBox)
+  .setText(2, 0, "Include Reference Number:")
+  .setWidget(2, 1, includeReferenceCheckBox);
+  
+  theFlow.add(theCheckGrid);
+  
+  if (auth) {theFlow.add(submitButton);}
+  
+  thePanel.add(theFlow);
+  
+  app.add(app.createScrollPanel(thePanel).setSize("100%", "100%"));
+  
+  theUi.showDialog(app);
+}
+
+/**
+* Update the properties for the script
+*
+* @param {object} the submit event
+* @return {object} new properties based on the form submission.
+*/
+function doPost(eventInfo) {
+  
+  var properties = {
+    "notificationList" : eventInfo.parameter.notificationListBox,
+    "emailSubject" : eventInfo.parameter.emailSubjectBox,
+    "emailHeader" : eventInfo.parameter.emailHeaderBox,
+    "sendTextOnly" : eventInfo.parameter.sendTextOnlyCheckBox=="on"?true:false,
+    "sendContent" : eventInfo.parameter.sendContentCheckBox=="on"?true:false,
+    "sendReceipt" : eventInfo.parameter.sendReceiptCheckBox=="on"?true:false,
+    "sendAttachment" : eventInfo.parameter.sendAttachmentCheckBox=="on"?true:false,
+    "includeReference" : eventInfo.parameter.includeReferenceCheckBox=="on"?true:false
+  };
+      
+  /* Update the Trigger */
+  if (ScriptApp.getProjectTriggers().length==0) {
+    ScriptApp.newTrigger('formSubmit')
+    .forForm(FormApp.getActiveForm())
+    .onFormSubmit()
+    .create();
+  }
+ 
+  return properties;
+}
+
+function removeTriggers() {
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i=0; i< triggers.length; i++) {
+    ScriptApp.deleteTrigger(triggers[i]);
   }
 }
