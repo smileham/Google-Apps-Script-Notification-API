@@ -56,4 +56,5 @@ The following steps can be completed by the original user;
 -- Send Attachment - Send the responses to the form as an attachment on the email
 -- Send Receipt - If you are capturing the Email of the submitter, this will send their responses back to them.
 -- Include Reference Number - Add a unique reference number to the email.
+-- Dynamic Routing - If checked, this will look for email address in the responses to questions and also include them in notification emails
 - Once you have completed these steps, the next submission to your form should be emailed to you.
