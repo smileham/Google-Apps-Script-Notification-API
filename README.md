@@ -47,14 +47,19 @@ The following steps can be completed by the original user;
 - Click “OK”
 - Click “Close” in the “Authorisation Status” window
 - Go back to your Form, from the top menu, click “Configure”, then “Configure Email”
-- You will now be asked a series of questions;
--- Notification List - Who do you want the automated email to be sent to, multiple email addresses can be entered, separated by a comma.
--- Email Subject - This will be the subject of the email, if your form includes a question labelled “Subject” this field will be appended to the email subject.
--- Email Header - This text will be put at the top of your email
--- Send Text Only - Send the content as Text Only rather than HTML
--- Send Form Content - Include the questions and answers in the email
--- Send Attachment - Send the responses to the form as an attachment on the email
--- Send Receipt - If you are capturing the Email of the submitter, this will send their responses back to them.
--- Include Reference Number - Add a unique reference number to the email.
--- Dynamic Routing - If checked, this will look for email address in the responses to questions and also include them in notification emails
+- You will now be asked a series of questions
+
+
+|Question|Help Text|
+|----|----|
+|Notification List|Who do you want the automated email to be sent to, multiple email addresses can be entered, separated by a comma.|
+|Email Subject|This will be the subject of the email, if your form includes a question labelled “Subject” this field will be appended to the email subject.|
+|Email Header|This text will be put at the top of your email|
+|Send Text Only|Send the content as Text Only rather than HTML|
+|Send Form Content|Include the questions and answers in the email|
+|Send Attachment|Send the responses to the form as an attachment on the email|
+|Send Receipt|If you are capturing the Email of the submitter, this will send their responses back to them.|
+|Include Reference Number|Add a unique reference number to the email.|
+|Dynamic Routing|If checked, this will look for email address in the responses to questions and also include them in notification emails|
+
 - Once you have completed these steps, the next submission to your form should be emailed to you.
