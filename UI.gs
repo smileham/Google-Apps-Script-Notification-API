@@ -22,6 +22,7 @@ function updatePreferences(properties) {
        "notificationList" : "",
        "emailSubject" : "",
        "emailHeader" : "",
+       "dynamicRouting": "false",
        "sendAttachment" : "false",
        "sendTextOnly" : "false",
        "sendContent" : "false",
@@ -39,6 +40,7 @@ function updatePreferences(properties) {
   var notificationListBox = app.createTextBox().setValue(properties.notificationList).setName('notificationListBox').setWidth("100%");
   var emailSubjectBox = app.createTextBox().setValue(properties.emailSubject).setName('emailSubjectBox').setWidth("100%");
   var emailHeaderBox = app.createTextArea().setValue(properties.emailHeader).setName('emailHeaderBox').setWidth("100%").setHeight("50px");
+  var dynamicRoutingCheckBox = app.createCheckBox().setValue(properties.dynamicRouting=="true").setName('dynamicRoutingCheckBox').setWidth("100%");
   var sendTextOnlyCheckBox = app.createCheckBox().setValue(properties.sendTextOnly=="true").setName('sendTextOnlyCheckBox').setWidth("100%");
   var sendContentCheckBox = app.createCheckBox().setValue(properties.sendContent=="true").setName('sendContentCheckBox').setWidth("100%");
   var sendReceiptCheckBox = app.createCheckBox().setValue(properties.sendReceipt=="true").setName('sendReceiptCheckBox').setWidth("100%");
@@ -76,7 +78,9 @@ function updatePreferences(properties) {
   .setText(1, 2, "Send Receipt:")
   .setWidget(1, 3, sendReceiptCheckBox)
   .setText(2, 0, "Include Reference Number:")
-  .setWidget(2, 1, includeReferenceCheckBox);
+  .setWidget(2, 1, includeReferenceCheckBox)
+  .setText(2, 2, "Dynamic Routing:")
+  .setWidget(2, 3, dynamicRoutingCheckBox);
   
   theFlow.add(theCheckGrid);
   
@@ -105,7 +109,8 @@ function doPost(eventInfo) {
     "sendContent" : eventInfo.parameter.sendContentCheckBox=="on"?true:false,
     "sendReceipt" : eventInfo.parameter.sendReceiptCheckBox=="on"?true:false,
     "sendAttachment" : eventInfo.parameter.sendAttachmentCheckBox=="on"?true:false,
-    "includeReference" : eventInfo.parameter.includeReferenceCheckBox=="on"?true:false
+    "includeReference" : eventInfo.parameter.includeReferenceCheckBox=="on"?true:false,
+    "dynamicRouting" : eventInfo.parameter.dynamicRoutingCheckBox=="on"?true:false
   };
       
   /* Update the Trigger */
