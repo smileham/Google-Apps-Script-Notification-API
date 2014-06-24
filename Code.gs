@@ -10,6 +10,10 @@ function formSubmit(e, properties) {
     var sendTextOnly = properties.sendTextOnly=="true"?true:false;
     var includeReference = properties.includeReference=="true"?true:false;
     var sendAttachment = properties.sendAttachment=="true"?true:false;
+    var dynamicRouting = properties.dynamicRouting=="true"?true:false;
+    
+    var emailRegEx = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}/;
+    var dynamicRoutingEmails ="";
     
     var currentReferenceNumber = 0;
     
@@ -53,11 +57,18 @@ function formSubmit(e, properties) {
               else {
                 responseText+= itemResponse.getResponse()[k]+'\n';
               }
+              if (dynamicRouting && emailRegEx.test(itemResponse.getResponse()[k])) {
+                dynamicRoutingEmails += ","+itemResponse.getResponse()[k].match(emailRegEx);
+              }
             }
           }
           else {
             responseTable += itemResponse.getResponse().replace(/\n/g, '<br />');
             responseText  += itemResponse.getResponse()+'\n';
+            
+            if (dynamicRouting && emailRegEx.test(itemResponse.getResponse())) {
+              dynamicRoutingEmails += ","+itemResponse.getResponse().match(emailRegEx);
+            }
           }
           
           responseTable+='</td></tr>';
@@ -84,7 +95,7 @@ function formSubmit(e, properties) {
     }
     
     var mailObject = {
-      to: notificationList,
+      to: notificationList+dynamicRoutingEmails,
       subject: emailSubject,
       noReply: true
     };
