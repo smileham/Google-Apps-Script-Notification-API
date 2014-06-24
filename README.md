@@ -29,7 +29,10 @@ Once the Library has been created the following process can be followed;
 - From the top menu, click “Resources”, then “Manage Libraries”
 - Name your script in the dialog that appears, eg, “MyFormSubmit”, click “OK”
 - Copy and paste the following “Project Key” into the “Find a Library” box;
+
 *This will be different in your instance* MvMPjfOa15AEN5pank2Gx_u_f9Eepb8L8
+
+
 - Click “Select”
 - In the “Version” drop down, choose the latest version of the library.
 - Click “Save”
